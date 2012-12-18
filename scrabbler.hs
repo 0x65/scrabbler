@@ -47,10 +47,10 @@ readDict = do
         if f' then readFile "/usr/share/dict/words"
         else error "Dictionary file not found. Re-run this program with the path to a dictionary file as its first parameter."
 
-solveWords :: HashTable String [String] -> IO [String]
+solveWords :: HashTable String [String] -> IO ()
 solveWords h = do
     letters <- getLine
-    possibleWords <- mapM (getWords h) ((powerSet . (map toLower)) letters)
+    possibleWords <- mapM (getWords h) (powerSet (map toLower letters))
     putStrLn (show (reverse ((sortBy (compare `on` baseScore) (nub (concat possibleWords))))))
     solveWords h
 
@@ -60,7 +60,6 @@ main = do
     args <- getArgs
     words <- (if (length args) > 0 then readFile (args!!0) else readDict)
     putStrLn "Loading the dictionary... This may take a couple seconds."
-    mapM_ (insertWord hashTable) ((lines . (map toLower)) words)
+    mapM_ (insertWord hashTable) (lines (map toLower words))
     putStrLn "Dictionary loaded! Enter a combination of letters to solve for:"
     solveWords hashTable
-    return ()
